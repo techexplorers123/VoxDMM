@@ -9,7 +9,7 @@ class MeterProcessor {
   final SpeechService speech;
   MeterProcessor(this.speech);
   MeterState old = MeterState();
-  final Map<Family, dynamic> unitTables = {
+  final Map<Family, String> unitNames = {
     Family.auto: "Auto",
     Family.voltageV: "volts",
     Family.voltageMV: "millivolts",
@@ -21,16 +21,16 @@ class MeterProcessor {
     Family.temperatureC: "celsius",
     Family.temperatureF: "fahrenheit",
     Family.diodeContinuity: "volts",
-    Family.resistance: {
-      ResistanceUnit.ohm: "ohms",
-      ResistanceUnit.kOhm: "kiloohms",
-      ResistanceUnit.mOhm: "megaohms",
-    },
-    Family.capacitance: {
-      CapacitanceUnit.uFarads: "micro farads",
-      CapacitanceUnit.nFarads: "nano farads",
-      CapacitanceUnit.mFarads: "milli farads",
-    },
+  };
+  final Map<ResistanceUnit, String> resistanceUnitNames = {
+    ResistanceUnit.ohm: "ohms",
+    ResistanceUnit.kOhm: "kiloohms",
+    ResistanceUnit.mOhm: "megaohms",
+  };
+  final Map<CapacitanceUnit, String> capacitanceUnitNames = {
+    CapacitanceUnit.uFarads: "micro farads",
+    CapacitanceUnit.nFarads: "nano farads",
+    CapacitanceUnit.mFarads: "milli farads",
   };
   final Map<Family, String> modeNames = {
     Family.auto: "auto",
@@ -110,16 +110,16 @@ class MeterProcessor {
   }
 
   String resolveUnit(MeterState state) {
-    final unit = unitTables[state.family];
-    if (unit is Map) {
-      if (state.family == Family.resistance) {
-        return unit[state.resistanceUnit] ?? "";
-      }
-      if (state.family == Family.capacitance) {
-        return unit[state.capacitanceUnit] ?? "";
-      }
+    switch (state.family) {
+      case Family.diodeContinuity:
+        return state.continuity ? "ohms" : "volts";
+      case Family.resistance:
+        return resistanceUnitNames[state.resistanceUnit] ?? "";
+      case Family.capacitance:
+        return capacitanceUnitNames[state.capacitanceUnit] ?? "";
+      default:
+        return unitNames[state.family] ?? "";
     }
-    return unit ?? "";
   }
 
   String acdcPrefix(MeterState state) {
@@ -130,6 +130,16 @@ class MeterProcessor {
       return "DC";
     }
     return "";
+  }
+
+  String formatModeAnnouncement(String mode, MeterState state) {
+    final prefix = acdcPrefix(state);
+    return prefix.isEmpty ? "$mode mode" : "$prefix $mode mode";
+  }
+
+  String formatValueAnnouncement(String value, MeterState state) {
+    final prefix = acdcPrefix(state);
+    return prefix.isEmpty ? value : "$value $prefix";
   }
 
   bool nearlyEqual(String a, String? b, [double tolerance = 0.02]) {
@@ -177,7 +187,7 @@ class MeterProcessor {
       state.family = Family.auto;
       state.rangeEnabled = false;
     }
-    if (display.contains("EF")) {
+    if (display.contains("EF") || RegExp(r"^-+$").hasMatch(display.trim())) {
       state.family = Family.ncv;
       state.rangeEnabled = false;
     }
@@ -187,6 +197,11 @@ class MeterProcessor {
       state.rangeEnabled = true;
     }
     if (icons.contains("BUZ") || icons.contains("DIODE")) {
+      if (icons.contains("ohm")) {
+        state.continuity = true;
+      } else {
+        state.continuity = false;
+      }
       state.family = Family.diodeContinuity;
       state.rangeEnabled = false;
     }
@@ -202,8 +217,6 @@ class MeterProcessor {
     state.relative = icons.contains("Delta");
     state.lowBattery = icons.contains("LowBattery");
     state.overload = isOverload(display);
-    state.continuity = icons.contains("BUZ");
-    state.diode = icons.contains("DIODE");
     state.unit = resolveUnit(state);
     return state;
   }
@@ -214,7 +227,7 @@ class MeterProcessor {
       if (mode == null) {
         return null;
       }
-      return "${acdcPrefix(newer)} $mode mode";
+      return formatModeAnnouncement(mode, newer);
     }
     return null;
   }
@@ -248,7 +261,7 @@ class MeterProcessor {
       return null;
     }
     lastSpokenValue = spoken;
-    return "$spoken ${acdcPrefix(newer)}";
+    return formatValueAnnouncement(spoken, newer);
   }
 
   String? announceSpecial(MeterState newer, MeterState older) {
@@ -269,11 +282,11 @@ class MeterProcessor {
     }
     if (newer.relative != older.relative) {
       return newer.relative
-          ? "relative mode enabled. Base voltage ${newer.value}"
+          ? "relative mode enabled. Base ${newer.unit} ${newer.value}"
           : "relative mode disabled";
     }
     if (newer.hold != older.hold) {
-      return newer.hold ? "hold value ${newer.value}" : "resume";
+      return newer.hold ? "hold value ${newer.value} ${newer.unit}" : "resume";
     }
     if (newer.rangeEnabled && newer.rangeMode != older.rangeMode) {
       if (newer.rangeMode == RangeMode.auto) {

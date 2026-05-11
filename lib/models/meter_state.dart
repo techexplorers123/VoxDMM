@@ -6,14 +6,11 @@ class MeterState {
   CapacitanceUnit? capacitanceUnit;
   ACDC acdc;
   bool continuity;
-  bool diode;
   bool rangeEnabled;
   RangeMode rangeMode;
   MinMaxMode minMax;
-  int rangeIndex;
   String value;
   String unit;
-  bool stable;
   bool overload;
   bool hold;
   bool relative;
@@ -24,14 +21,11 @@ class MeterState {
     this.capacitanceUnit,
     this.acdc = ACDC.none,
     this.continuity = false,
-    this.diode = false,
     this.rangeEnabled = false,
     this.rangeMode = RangeMode.auto,
     this.minMax = MinMaxMode.none,
-    this.rangeIndex = 0,
     this.value = "",
     this.unit = "",
-    this.stable = false,
     this.overload = false,
     this.hold = false,
     this.relative = false,
@@ -45,14 +39,11 @@ class MeterState {
       capacitanceUnit: capacitanceUnit,
       acdc: acdc,
       continuity: continuity,
-      diode: diode,
       rangeEnabled: rangeEnabled,
       rangeMode: rangeMode,
       minMax: minMax,
-      rangeIndex: rangeIndex,
       value: value,
       unit: unit,
-      stable: stable,
       overload: overload,
       hold: hold,
       relative: relative,
