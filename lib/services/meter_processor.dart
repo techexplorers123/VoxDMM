@@ -132,6 +132,16 @@ class MeterProcessor {
     return "";
   }
 
+  String formatModeAnnouncement(String mode, MeterState state) {
+    final prefix = acdcPrefix(state);
+    return prefix.isEmpty ? "$mode mode" : "$prefix $mode mode";
+  }
+
+  String formatValueAnnouncement(String value, MeterState state) {
+    final prefix = acdcPrefix(state);
+    return prefix.isEmpty ? value : "$value $prefix";
+  }
+
   bool nearlyEqual(String a, String? b, [double tolerance = 0.02]) {
     try {
       final aa = double.parse(a);
@@ -217,7 +227,7 @@ class MeterProcessor {
       if (mode == null) {
         return null;
       }
-      return "${acdcPrefix(newer)} $mode mode";
+      return formatModeAnnouncement(mode, newer);
     }
     return null;
   }
@@ -251,7 +261,7 @@ class MeterProcessor {
       return null;
     }
     lastSpokenValue = spoken;
-    return "$spoken ${acdcPrefix(newer)}";
+    return formatValueAnnouncement(spoken, newer);
   }
 
   String? announceSpecial(MeterState newer, MeterState older) {
