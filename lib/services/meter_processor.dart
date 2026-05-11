@@ -112,6 +112,13 @@ class MeterProcessor {
   String resolveUnit(MeterState state) {
     final unit = unitTables[state.family];
     if (unit is Map) {
+      if (state.family == Family.diodeContinuity) {
+        if (state.continuity) {
+          return "ohms";
+        } else {
+          return "volts";
+        }
+      }
       if (state.family == Family.resistance) {
         return unit[state.resistanceUnit] ?? "";
       }
@@ -187,6 +194,11 @@ class MeterProcessor {
       state.rangeEnabled = true;
     }
     if (icons.contains("BUZ") || icons.contains("DIODE")) {
+      if (icons.contains("ohm")) {
+        state.continuity = true;
+      } else {
+        state.continuity = false;
+      }
       state.family = Family.diodeContinuity;
       state.rangeEnabled = false;
     }
@@ -202,8 +214,6 @@ class MeterProcessor {
     state.relative = icons.contains("Delta");
     state.lowBattery = icons.contains("LowBattery");
     state.overload = isOverload(display);
-    state.continuity = icons.contains("BUZ");
-    state.diode = icons.contains("DIODE");
     state.unit = resolveUnit(state);
     return state;
   }
