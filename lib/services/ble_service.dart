@@ -8,7 +8,9 @@ class BLEService {
   bool _reconnecting = false;
   bool _disposed = false;
   static final Guid notifyUuid = Guid("0000fff4-0000-1000-8000-00805f9b34fb");
-
+  final StreamController<String> _statusController =
+      StreamController.broadcast();
+  Stream<String> get statusStream => _statusController.stream;
   BluetoothDevice? _device;
 
   StreamSubscription<List<ScanResult>>? _scanSub;
@@ -40,17 +42,16 @@ class BLEService {
     _scanSub?.cancel();
 
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
-
+    _statusController.add("Scanning");
     _scanSub = FlutterBluePlus.scanResults.listen((results) async {
       for (final result in results) {
         final device = result.device;
 
         if (device.platformName != deviceName) continue;
-
         await FlutterBluePlus.stopScan();
 
         _device = device;
-
+        _statusController.add("Connecting");
         await _connect();
 
         break;
@@ -67,13 +68,12 @@ class BLEService {
         timeout: const Duration(seconds: 15),
       );
     } catch (_) {}
-
     _connectionSub?.cancel();
-
+    _statusController.add("Connected");
     _connectionSub = _device!.connectionState.listen((state) async {
       if (state == BluetoothConnectionState.disconnected) {
         await cleanupNotifications();
-
+        _statusController.add("Disconnected");
         await _tryReconnect();
       }
     });
@@ -116,7 +116,7 @@ class BLEService {
     }
 
     _reconnecting = true;
-
+    _statusController.add("Reconnecting");
     while (!_disposed) {
       try {
         await _device!.connect(

@@ -43,6 +43,7 @@ class _HomePageState extends State<HomePage> {
   late MeterProcessor processor;
   late BLEService ble;
   StreamSubscription? bleSub;
+  StreamSubscription? statusSub;
   String currentValue = "";
   String currentMode = "";
   String status = "Disconnected";
@@ -58,10 +59,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> startBLE() async {
-    setState(() {
-      status = "Scanning...";
+    statusSub = ble.statusStream.listen((newStatus) {
+      if (!mounted) return;
+      setState(() {
+        status = newStatus;
+      });
     });
-
     bleSub = ble.dataStream.listen((data) async {
       final d = decode(data);
 
@@ -75,10 +78,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
 
       setState(() {
-        status = "Connected";
-
         currentValue = "${state.value} ${state.unit}";
-
         currentMode = processor.modeNames[state.family] ?? "";
       });
     });
@@ -95,8 +95,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     bleSub?.cancel();
+    statusSub?.cancel();
     ble.dispose();
-
     super.dispose();
   }
 
