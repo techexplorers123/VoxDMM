@@ -123,9 +123,8 @@ class BLEService {
           license: License.free,
           timeout: const Duration(seconds: 15),
         );
-
         await _setupNotifications();
-
+        _statusController.add("Connected");
         break;
       } catch (_) {
         await Future.delayed(const Duration(seconds: 3));
