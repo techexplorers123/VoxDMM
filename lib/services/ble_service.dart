@@ -5,7 +5,8 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class BLEService {
   static const String deviceName = "Bluetooth DMM";
-
+  bool _reconnecting = false;
+  bool _disposed = false;
   static final Guid notifyUuid = Guid("0000fff4-0000-1000-8000-00805f9b34fb");
 
   BluetoothDevice? _device;
@@ -65,27 +66,38 @@ class BLEService {
         license: License.free,
         timeout: const Duration(seconds: 15),
       );
-    } catch (_) {
-      // already connected
-    }
+    } catch (_) {}
 
     _connectionSub?.cancel();
 
     _connectionSub = _device!.connectionState.listen((state) async {
       if (state == BluetoothConnectionState.disconnected) {
-        await cleanup();
+        await cleanupNotifications();
+
+        await _tryReconnect();
       }
     });
 
+    await _setupNotifications();
+  }
+
+  Future<void> cleanupNotifications() async {
+    await _notifySub?.cancel();
+    _notifySub = null;
+  }
+
+  Future<void> _setupNotifications() async {
     final services = await _device!.discoverServices();
 
     for (final service in services) {
       for (final characteristic in service.characteristics) {
-        if (characteristic.uuid != notifyUuid) continue;
+        if (characteristic.uuid != notifyUuid) {
+          continue;
+        }
 
         await characteristic.setNotifyValue(true);
 
-        _notifySub?.cancel();
+        await _notifySub?.cancel();
 
         _notifySub = characteristic.onValueReceived.listen((value) {
           _dataController.add(Uint8List.fromList(value));
@@ -96,6 +108,31 @@ class BLEService {
     }
 
     throw Exception("Notify characteristic not found");
+  }
+
+  Future<void> _tryReconnect() async {
+    if (_reconnecting || _disposed || _device == null) {
+      return;
+    }
+
+    _reconnecting = true;
+
+    while (!_disposed) {
+      try {
+        await _device!.connect(
+          license: License.free,
+          timeout: const Duration(seconds: 15),
+        );
+
+        await _setupNotifications();
+
+        break;
+      } catch (_) {
+        await Future.delayed(const Duration(seconds: 3));
+      }
+    }
+
+    _reconnecting = false;
   }
 
   Future<void> disconnect() async {
@@ -109,7 +146,10 @@ class BLEService {
   }
 
   Future<void> dispose() async {
+    _disposed = true;
+
     await cleanup();
+
     await disconnect();
     await _dataController.close();
   }
