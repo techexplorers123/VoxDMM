@@ -17,7 +17,7 @@ class MeterProcessor {
     Family.currentMA: "milliamps",
     Family.currentU: "micro amps",
     Family.frequency: "hertz",
-    Family.duty: "%",
+    Family.duty: "percent",
     Family.temperatureC: "celsius",
     Family.temperatureF: "fahrenheit",
     Family.diodeContinuity: "volts",
@@ -162,6 +162,16 @@ class MeterProcessor {
       state.rangeEnabled = true;
     } else if (icons.contains("Hz")) {
       state.family = Family.frequency;
+      state.rangeEnabled = false;
+    } else if (icons.contains("%")) {
+      state.rangeEnabled = false;
+      state.family = Family.duty;
+    } else if (icons.contains("oF")) {
+      state.rangeEnabled = false;
+      state.family = Family.temperatureF;
+    } else if (icons.contains("oC")) {
+      state.rangeEnabled = false;
+      state.family = Family.temperatureC;
     }
     if (display == "Auto") {
       state.family = Family.auto;
@@ -172,18 +182,18 @@ class MeterProcessor {
       state.rangeEnabled = false;
     }
     if (icons.contains("ohm") && !icons.contains("BUZ")) {
+      state.resistanceUnit = decodeResistanceUnit(icons);
       state.family = Family.resistance;
       state.rangeEnabled = true;
-      state.resistanceUnit = decodeResistanceUnit(icons);
     }
     if (icons.contains("BUZ") || icons.contains("DIODE")) {
       state.family = Family.diodeContinuity;
       state.rangeEnabled = false;
     }
     if (icons.contains("F")) {
+      state.capacitanceUnit = decodeCapacitanceUnit(icons);
       state.family = Family.capacitance;
       state.rangeEnabled = false;
-      state.capacitanceUnit = decodeCapacitanceUnit(icons);
     }
     state.acdc = decodeACDC(icons);
     state.rangeMode = decodeRange(icons);
@@ -259,11 +269,18 @@ class MeterProcessor {
     }
     if (newer.relative != older.relative) {
       return newer.relative
-          ? "relative mode enabled"
+          ? "relative mode enabled. Base voltage ${newer.value}"
           : "relative mode disabled";
     }
     if (newer.hold != older.hold) {
       return newer.hold ? "hold value ${newer.value}" : "resume";
+    }
+    if (newer.rangeEnabled && newer.rangeMode != older.rangeMode) {
+      if (newer.rangeMode == RangeMode.auto) {
+        return "auto range";
+      } else {
+        return "manual range";
+      }
     }
     return null;
   }
