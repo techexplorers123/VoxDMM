@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     bleSub?.cancel();
     statusSub?.cancel();
-    ble.dispose();
+    unawaited(ble.dispose());
     super.dispose();
   }
 
