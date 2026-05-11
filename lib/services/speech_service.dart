@@ -6,7 +6,7 @@ class SpeechService {
   Future<void> init() async {
     await tts.setLanguage("en-US");
 
-    await tts.setSpeechRate(0.5);
+    await tts.setSpeechRate(0.9);
 
     await tts.setPitch(1.0);
 

@@ -48,6 +48,8 @@ class MeterProcessor {
     Family.diodeContinuity: "continuity diode test",
     Family.ncv: "non-contact voltage",
   };
+
+  bool _processing = false;
   bool isOverload(String display) {
     final cleaned = display
         .toUpperCase()
@@ -267,21 +269,28 @@ class MeterProcessor {
   }
 
   Future<void> processState(MeterState newer) async {
-    String? msg;
-    msg = announceMode(newer, old);
-    if (msg != null) {
-      await speech.speak(msg, interrupt: true);
-    } else {
-      msg = announceSpecial(newer, old);
+    if (_processing) return;
+    _processing = true;
+    try {
+      final previous = old.copy();
+      old = newer.copy();
+      String? msg;
+      msg = announceMode(newer, previous);
       if (msg != null) {
         await speech.speak(msg, interrupt: true);
       } else {
-        msg = announceValue(newer, old);
+        msg = announceSpecial(newer, previous);
         if (msg != null) {
-          await speech.speak(msg);
+          await speech.speak(msg, interrupt: true);
+        } else {
+          msg = announceValue(newer, previous);
+          if (msg != null) {
+            await speech.speak(msg);
+          }
         }
       }
+    } finally {
+      _processing = false;
     }
-    old = newer.copy();
   }
 }
