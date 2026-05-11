@@ -1,0 +1,62 @@
+import 'package:voxdmm/enums/meter_enums.dart';
+
+class MeterState {
+  Family? family;
+  Resistance_Unit? resistanceUnit;
+  Capacitance_Unit? capacitanceUnit;
+  ACDC acdc;
+  bool continuity;
+  bool diode;
+  bool rangeEnabled;
+  RangeMode rangeMode;
+  MinMaxMode minMax;
+  int rangeIndex;
+  String value;
+  String unit;
+  bool stable;
+  bool overload;
+  bool hold;
+  bool relative;
+  bool lowBattery;
+  MeterState({
+    this.family,
+    this.resistanceUnit,
+    this.capacitanceUnit,
+    this.acdc = ACDC.none,
+    this.continuity = false,
+    this.diode = false,
+    this.rangeEnabled = false,
+    this.rangeMode = RangeMode.AUTO,
+    this.minMax = MinMaxMode.NONE,
+    this.rangeIndex = 0,
+    this.value = "",
+    this.unit = "",
+    this.stable = false,
+    this.overload = false,
+    this.hold = false,
+    this.relative = false,
+    this.lowBattery = false,
+  });
+
+  MeterState copy() {
+    return MeterState(
+      family: family,
+      resistanceUnit: resistanceUnit,
+      capacitanceUnit: capacitanceUnit,
+      acdc: acdc,
+      continuity: continuity,
+      diode: diode,
+      rangeEnabled: rangeEnabled,
+      rangeMode: rangeMode,
+      minMax: minMax,
+      rangeIndex: rangeIndex,
+      value: value,
+      unit: unit,
+      stable: stable,
+      overload: overload,
+      hold: hold,
+      relative: relative,
+      lowBattery: lowBattery,
+    );
+  }
+}
