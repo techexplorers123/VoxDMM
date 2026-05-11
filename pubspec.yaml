@@ -1,7 +1,7 @@
 name: voxdmm
 description: "an app to  make bluetooth  multimeters accessible for blind through voice. Currently only zotk's multimeter's are supported"
 publish_to: "none"
-version: 1.2.0+5
+version: 1.3.0+6
 
 environment:
     sdk: ^3.11.5
