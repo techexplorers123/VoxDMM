@@ -72,12 +72,9 @@ class _HomePageState extends State<HomePage> {
       await widget.speech.speak(newStatus, interrupt: true);
     });
     bleSub = ble.dataStream.listen((data) async {
-      final d = decode(data);
+      final decoded = decode(data);
 
-      final state = processor.decodeMeterState(
-        d["display"],
-        Set<String>.from(d["icons"]),
-      );
+      final state = processor.decodeMeterState(decoded.display, decoded.icons);
 
       await processor.processState(state);
 
