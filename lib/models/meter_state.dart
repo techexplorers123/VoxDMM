@@ -1,4 +1,4 @@
-import 'package:voxdmm/enums/meter_Enums.dart';
+import 'package:voxdmm/enums/meter_enums.dart';
 
 class MeterState {
   Family? family;
@@ -26,8 +26,8 @@ class MeterState {
     this.continuity = false,
     this.diode = false,
     this.rangeEnabled = false,
-    this.rangeMode = RangeMode.AUTO,
-    this.minMax = MinMaxMode.NONE,
+    this.rangeMode = RangeMode.auto,
+    this.minMax = MinMaxMode.none,
     this.rangeIndex = 0,
     this.value = "",
     this.unit = "",

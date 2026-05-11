@@ -3,21 +3,21 @@ enum Family {
   frequency,
   duty,
   ncv,
-  temperaturec,
-  temperaturef,
-  diodecontinuity,
+  temperatureC,
+  temperatureF,
+  diodeContinuity,
   capacitance,
-  voltagev,
-  voltagemv,
-  currenta,
-  currentma,
-  currentu,
+  voltageV,
+  voltageMV,
+  currentA,
+  currentMA,
+  currentU,
   auto,
 }
 
-enum ResistanceUnit { ohm, kohm, mohm }
+enum ResistanceUnit { ohm, kOhm, mOhm }
 
-enum CapacitanceUnit { ufarads, nfarads, mfarads }
+enum CapacitanceUnit { uFarads, nFarads, mFarads }
 
 enum ACDC { ac, dc, none }
 
