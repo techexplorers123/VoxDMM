@@ -177,7 +177,7 @@ class MeterProcessor {
       state.family = Family.auto;
       state.rangeEnabled = false;
     }
-    if (display.contains("EF")) {
+    if (display.contains("EF") || display.contains("-")) {
       state.family = Family.ncv;
       state.rangeEnabled = false;
     }
@@ -269,11 +269,11 @@ class MeterProcessor {
     }
     if (newer.relative != older.relative) {
       return newer.relative
-          ? "relative mode enabled. Base voltage ${newer.value}"
+          ? "relative mode enabled. Base ${newer.unit} ${newer.value}"
           : "relative mode disabled";
     }
     if (newer.hold != older.hold) {
-      return newer.hold ? "hold value ${newer.value}" : "resume";
+      return newer.hold ? "hold value ${newer.value} ${newer.unit}" : "resume";
     }
     if (newer.rangeEnabled && newer.rangeMode != older.rangeMode) {
       if (newer.rangeMode == RangeMode.auto) {
