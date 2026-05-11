@@ -1,60 +1,116 @@
+import 'dart:async';
 import 'dart:typed_data';
+
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class BLEService {
   static const String deviceName = "Bluetooth DMM";
 
-  static const String dmmUUID = "0000fff4-0000-1000-8000-00805f9b34fb";
+  static final Guid notifyUuid = Guid("0000fff4-0000-1000-8000-00805f9b34fb");
 
-  BluetoothDevice? device;
+  BluetoothDevice? _device;
 
-  BluetoothCharacteristic? notifyChar;
+  StreamSubscription<List<ScanResult>>? _scanSub;
+  StreamSubscription<BluetoothConnectionState>? _connectionSub;
+  StreamSubscription<List<int>>? _notifySub;
 
-  Future<void> startScan({required Function(Uint8List data) onData}) async {
+  final StreamController<Uint8List> _dataController =
+      StreamController.broadcast();
+
+  Stream<Uint8List> get dataStream => _dataController.stream;
+
+  bool get isConnected => _device?.isConnected == true;
+
+  Future<void> start() async {
+    await _waitForBluetooth();
+
+    await _scanAndConnect();
+  }
+
+  Future<void> _waitForBluetooth() async {
+    if (await FlutterBluePlus.adapterState.first != BluetoothAdapterState.on) {
+      throw Exception("Bluetooth is off");
+    }
+  }
+
+  Future<void> _scanAndConnect() async {
+    await FlutterBluePlus.stopScan();
+
+    _scanSub?.cancel();
+
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
 
-    FlutterBluePlus.scanResults.listen((results) async {
-      for (ScanResult r in results) {
-        final d = r.device;
+    _scanSub = FlutterBluePlus.scanResults.listen((results) async {
+      for (final result in results) {
+        final device = result.device;
 
-        if (d.platformName == deviceName) {
-          await FlutterBluePlus.stopScan();
+        if (device.platformName != deviceName) continue;
 
-          device = d;
+        await FlutterBluePlus.stopScan();
 
-          await connect(onData: onData);
+        _device = device;
 
-          break;
-        }
+        await _connect();
+
+        break;
       }
     });
   }
 
-  Future<void> connect({required Function(Uint8List data) onData}) async {
-    if (device == null) return;
+  Future<void> _connect() async {
+    if (_device == null) return;
 
-    await device!.connect(license: License.free);
+    try {
+      await _device!.connect(
+        license: License.free,
+        timeout: const Duration(seconds: 15),
+      );
+    } catch (_) {
+      // already connected
+    }
 
-    final services = await device!.discoverServices();
+    _connectionSub?.cancel();
 
-    for (BluetoothService service in services) {
-      for (BluetoothCharacteristic c in service.characteristics) {
-        if (c.uuid.toString().toLowerCase() == dmmUUID) {
-          notifyChar = c;
+    _connectionSub = _device!.connectionState.listen((state) async {
+      if (state == BluetoothConnectionState.disconnected) {
+        await cleanup();
+      }
+    });
 
-          await c.setNotifyValue(true);
+    final services = await _device!.discoverServices();
 
-          c.lastValueStream.listen((value) {
-            onData(Uint8List.fromList(value));
-          });
+    for (final service in services) {
+      for (final characteristic in service.characteristics) {
+        if (characteristic.uuid != notifyUuid) continue;
 
-          return;
-        }
+        await characteristic.setNotifyValue(true);
+
+        _notifySub?.cancel();
+
+        _notifySub = characteristic.onValueReceived.listen((value) {
+          _dataController.add(Uint8List.fromList(value));
+        });
+
+        return;
       }
     }
+
+    throw Exception("Notify characteristic not found");
   }
 
   Future<void> disconnect() async {
-    await device?.disconnect();
+    await _device?.disconnect();
+  }
+
+  Future<void> cleanup() async {
+    await _scanSub?.cancel();
+    await _connectionSub?.cancel();
+    await _notifySub?.cancel();
+  }
+
+  Future<void> dispose() async {
+    await cleanup();
+    await disconnect();
+    await _dataController.close();
   }
 }

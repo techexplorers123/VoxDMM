@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'services/speech_service.dart';
 import 'services/meter_processor.dart';
@@ -41,6 +42,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late MeterProcessor processor;
   late BLEService ble;
+  StreamSubscription? bleSub;
   String currentValue = "";
   String currentMode = "";
   String status = "Disconnected";
@@ -48,8 +50,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     processor = MeterProcessor(widget.speech);
     ble = BLEService();
+
     startBLE();
   }
 
@@ -58,28 +62,42 @@ class _HomePageState extends State<HomePage> {
       status = "Scanning...";
     });
 
-    await ble.startScan(
-      onData: (data) async {
-        setState(() {
-          status = "Connected";
-        });
+    bleSub = ble.dataStream.listen((data) async {
+      final d = decode(data);
 
-        final d = decode(data);
+      final state = processor.decodeMeterState(
+        d["display"],
+        Set<String>.from(d["icons"]),
+      );
 
-        final state = processor.decodeMeterState(
-          d["display"],
-          Set<String>.from(d["icons"]),
-        );
+      await processor.processState(state);
 
-        await processor.processState(state);
+      if (!mounted) return;
 
-        setState(() {
-          currentValue = "${state.value} ${state.unit}";
+      setState(() {
+        status = "Connected";
 
-          currentMode = processor.modeNames[state.family] ?? "";
-        });
-      },
-    );
+        currentValue = "${state.value} ${state.unit}";
+
+        currentMode = processor.modeNames[state.family] ?? "";
+      });
+    });
+
+    try {
+      await ble.start();
+    } catch (e) {
+      setState(() {
+        status = e.toString();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    bleSub?.cancel();
+    ble.dispose();
+
+    super.dispose();
   }
 
   @override
