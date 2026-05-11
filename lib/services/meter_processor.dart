@@ -294,17 +294,17 @@ class MeterProcessor {
       String? msg;
       msg = announceMode(newer, previous);
       if (msg != null) {
+        await speech.speakImportant(msg);
+        return;
+      }
+      msg = announceSpecial(newer, previous);
+      if (msg != null) {
+        await speech.speakImportant(msg);
+        return;
+      }
+      msg = announceValue(newer, previous);
+      if (msg != null) {
         await speech.speak(msg, interrupt: true);
-      } else {
-        msg = announceSpecial(newer, previous);
-        if (msg != null) {
-          await speech.speak(msg, interrupt: true);
-        } else {
-          msg = announceValue(newer, previous);
-          if (msg != null) {
-            await speech.speak(msg);
-          }
-        }
       }
     } finally {
       _processing = false;
