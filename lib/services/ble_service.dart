@@ -74,12 +74,7 @@ class BLEService {
   Future<void> _connect() async {
     if (_device == null) return;
 
-    try {
-      await _device!.connect(
-        license: License.free,
-        timeout: const Duration(seconds: 15),
-      );
-    } catch (_) {}
+    await _connectDevice();
     _connectionSub?.cancel();
     _emitStatus("Connected");
     _connectionSub = _device!.connectionState.listen((state) async {
@@ -91,6 +86,19 @@ class BLEService {
     });
 
     await _setupNotifications();
+  }
+
+  Future<void> _connectDevice() async {
+    try {
+      await _device!.connect(
+        license: License.free,
+        timeout: const Duration(seconds: 15),
+      );
+    } catch (_) {
+      if (!isConnected) {
+        rethrow;
+      }
+    }
   }
 
   Future<void> _cleanupNotifications() async {
@@ -131,10 +139,7 @@ class BLEService {
     _emitStatus("Reconnecting");
     while (!_disposed) {
       try {
-        await _device!.connect(
-          license: License.free,
-          timeout: const Duration(seconds: 15),
-        );
+        await _connectDevice();
         await _setupNotifications();
         _emitStatus("Connected");
         break;
