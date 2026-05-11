@@ -9,7 +9,7 @@ class MeterProcessor {
   final SpeechService speech;
   MeterProcessor(this.speech);
   MeterState old = MeterState();
-  final Map<Family, dynamic> unitTables = {
+  final Map<Family, String> unitNames = {
     Family.auto: "Auto",
     Family.voltageV: "volts",
     Family.voltageMV: "millivolts",
@@ -21,16 +21,16 @@ class MeterProcessor {
     Family.temperatureC: "celsius",
     Family.temperatureF: "fahrenheit",
     Family.diodeContinuity: "volts",
-    Family.resistance: {
-      ResistanceUnit.ohm: "ohms",
-      ResistanceUnit.kOhm: "kiloohms",
-      ResistanceUnit.mOhm: "megaohms",
-    },
-    Family.capacitance: {
-      CapacitanceUnit.uFarads: "micro farads",
-      CapacitanceUnit.nFarads: "nano farads",
-      CapacitanceUnit.mFarads: "milli farads",
-    },
+  };
+  final Map<ResistanceUnit, String> resistanceUnitNames = {
+    ResistanceUnit.ohm: "ohms",
+    ResistanceUnit.kOhm: "kiloohms",
+    ResistanceUnit.mOhm: "megaohms",
+  };
+  final Map<CapacitanceUnit, String> capacitanceUnitNames = {
+    CapacitanceUnit.uFarads: "micro farads",
+    CapacitanceUnit.nFarads: "nano farads",
+    CapacitanceUnit.mFarads: "milli farads",
   };
   final Map<Family, String> modeNames = {
     Family.auto: "auto",
@@ -110,23 +110,16 @@ class MeterProcessor {
   }
 
   String resolveUnit(MeterState state) {
-    final unit = unitTables[state.family];
-    if (unit is Map) {
-      if (state.family == Family.diodeContinuity) {
-        if (state.continuity) {
-          return "ohms";
-        } else {
-          return "volts";
-        }
-      }
-      if (state.family == Family.resistance) {
-        return unit[state.resistanceUnit] ?? "";
-      }
-      if (state.family == Family.capacitance) {
-        return unit[state.capacitanceUnit] ?? "";
-      }
+    switch (state.family) {
+      case Family.diodeContinuity:
+        return state.continuity ? "ohms" : "volts";
+      case Family.resistance:
+        return resistanceUnitNames[state.resistanceUnit] ?? "";
+      case Family.capacitance:
+        return capacitanceUnitNames[state.capacitanceUnit] ?? "";
+      default:
+        return unitNames[state.family] ?? "";
     }
-    return unit ?? "";
   }
 
   String acdcPrefix(MeterState state) {
