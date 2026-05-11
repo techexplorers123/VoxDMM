@@ -5,12 +5,12 @@ class SpeechService {
 
   Future<void> init() async {
     await tts.setLanguage("en-US");
-
     await tts.setSpeechRate(0.9);
-
     await tts.setPitch(1.0);
-
     await tts.awaitSpeakCompletion(true);
+    await tts.setAudioAttributesForNavigation();
+    await tts.setSharedInstance(true);
+    await tts.setQueueMode(1);
   }
 
   Future<void> speak(String text, {bool interrupt = false}) async {
