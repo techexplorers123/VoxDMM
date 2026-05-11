@@ -24,6 +24,18 @@ class BLEService {
 
   bool get isConnected => _device?.isConnected == true;
 
+  void _emitStatus(String status) {
+    if (!_statusController.isClosed) {
+      _statusController.add(status);
+    }
+  }
+
+  void _emitData(List<int> value) {
+    if (!_dataController.isClosed) {
+      _dataController.add(Uint8List.fromList(value));
+    }
+  }
+
   Future<void> start() async {
     await _waitForBluetooth();
 
@@ -42,7 +54,7 @@ class BLEService {
     _scanSub?.cancel();
 
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
-    _statusController.add("Scanning");
+    _emitStatus("Scanning");
     _scanSub = FlutterBluePlus.scanResults.listen((results) async {
       for (final result in results) {
         final device = result.device;
@@ -51,7 +63,7 @@ class BLEService {
         await FlutterBluePlus.stopScan();
 
         _device = device;
-        _statusController.add("Connecting");
+        _emitStatus("Connecting");
         await _connect();
 
         break;
@@ -62,18 +74,13 @@ class BLEService {
   Future<void> _connect() async {
     if (_device == null) return;
 
-    try {
-      await _device!.connect(
-        license: License.free,
-        timeout: const Duration(seconds: 15),
-      );
-    } catch (_) {}
+    await _connectDevice();
     _connectionSub?.cancel();
-    _statusController.add("Connected");
+    _emitStatus("Connected");
     _connectionSub = _device!.connectionState.listen((state) async {
       if (state == BluetoothConnectionState.disconnected) {
-        await cleanupNotifications();
-        _statusController.add("Disconnected");
+        await _cleanupNotifications();
+        _emitStatus("Disconnected");
         await _tryReconnect();
       }
     });
@@ -81,7 +88,20 @@ class BLEService {
     await _setupNotifications();
   }
 
-  Future<void> cleanupNotifications() async {
+  Future<void> _connectDevice() async {
+    try {
+      await _device!.connect(
+        license: License.free,
+        timeout: const Duration(seconds: 15),
+      );
+    } catch (_) {
+      if (!isConnected) {
+        rethrow;
+      }
+    }
+  }
+
+  Future<void> _cleanupNotifications() async {
     await _notifySub?.cancel();
     _notifySub = null;
   }
@@ -100,7 +120,7 @@ class BLEService {
         await _notifySub?.cancel();
 
         _notifySub = characteristic.onValueReceived.listen((value) {
-          _dataController.add(Uint8List.fromList(value));
+          _emitData(value);
         });
 
         return;
@@ -116,15 +136,12 @@ class BLEService {
     }
 
     _reconnecting = true;
-    _statusController.add("Reconnecting");
+    _emitStatus("Reconnecting");
     while (!_disposed) {
       try {
-        await _device!.connect(
-          license: License.free,
-          timeout: const Duration(seconds: 15),
-        );
+        await _connectDevice();
         await _setupNotifications();
-        _statusController.add("Connected");
+        _emitStatus("Connected");
         break;
       } catch (_) {
         await Future.delayed(const Duration(seconds: 3));
@@ -151,5 +168,6 @@ class BLEService {
 
     await disconnect();
     await _dataController.close();
+    await _statusController.close();
   }
 }

@@ -9,7 +9,6 @@ class MeterState {
   bool rangeEnabled;
   RangeMode rangeMode;
   MinMaxMode minMax;
-  int rangeIndex;
   String value;
   String unit;
   bool overload;
@@ -25,7 +24,6 @@ class MeterState {
     this.rangeEnabled = false,
     this.rangeMode = RangeMode.auto,
     this.minMax = MinMaxMode.none,
-    this.rangeIndex = 0,
     this.value = "",
     this.unit = "",
     this.overload = false,
@@ -44,7 +42,6 @@ class MeterState {
       rangeEnabled: rangeEnabled,
       rangeMode: rangeMode,
       minMax: minMax,
-      rangeIndex: rangeIndex,
       value: value,
       unit: unit,
       overload: overload,

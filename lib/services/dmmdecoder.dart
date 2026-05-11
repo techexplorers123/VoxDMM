@@ -43,8 +43,23 @@ const digitMap = {
   "0000010": "-",
 };
 
-List<int> parseHex(String data) =>
-    data.split(' ').map((e) => int.parse(e, radix: 16)).toList();
+class DecodedMeterData {
+  final String typeID;
+  final String display;
+  final Set<String> icons;
+
+  const DecodedMeterData({
+    required this.typeID,
+    required this.display,
+    required this.icons,
+  });
+}
+
+List<int> parseHex(String data) => data
+    .trim()
+    .split(RegExp(r'\s+'))
+    .map((e) => int.parse(e, radix: 16))
+    .toList();
 
 String reverseBits(int value) =>
     value.toRadixString(2).padLeft(8, '0').split('').reversed.join();
@@ -141,7 +156,7 @@ List<String> decodeIcons(String bits, String typeID) {
   ];
 }
 
-Map<String, dynamic> decode(dynamic data) {
+DecodedMeterData decode(Object data) {
   final bytes = switch (data) {
     String s => parseHex(s),
     List<int> l => l,
@@ -155,12 +170,12 @@ Map<String, dynamic> decode(dynamic data) {
 
   final typeID = binary.substring(16, 18);
 
-  return {
-    "typeID": typeID,
-    "display": decodeDisplay(binary.substring(28, 60)),
-    "icons": decodeIcons(
+  return DecodedMeterData(
+    typeID: typeID,
+    display: decodeDisplay(binary.substring(28, 60)),
+    icons: decodeIcons(
       binary.substring(24, 28) + binary.substring(60, 87),
       typeID,
-    ),
-  };
+    ).toSet(),
+  );
 }
