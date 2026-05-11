@@ -46,7 +46,7 @@ jobs:
                   KEY_PASSWORD: ${{secrets.KEYSTORE_PASSWORD}}
 
             - name: Build release APK
-              run: flutter build apk --release&&flutter appbundle --release
+              run: flutter build apk --release&&flutter build appbundle --release
 
             - name: Rename APK
               run: mv build/app/outputs/flutter-apk/app-release.apk VoxDMM-release-${{ github.ref_name }}.apk&&mv build/app/outputs/bundle/release/app-release.aab VoxDMM-release-${{ github.ref_name }}.aab
