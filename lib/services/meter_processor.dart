@@ -1,10 +1,13 @@
 import 'package:voxdmm/enums/meter_enums.dart';
 import 'package:voxdmm/models/meter_state.dart';
+import 'speech_service.dart';
 
 class MeterProcessor {
   String? lastSpokenValue;
   String? lastStableValue;
   DateTime lastChangeTime = DateTime.now();
+  final SpeechService speech;
+  MeterProcessor(this.speech);
   MeterState old = MeterState();
   final Map<Family, dynamic> unitTables = {
     Family.auto: "Auto",
@@ -263,12 +266,22 @@ class MeterProcessor {
     return null;
   }
 
-  String? processState(MeterState newer) {
+  Future<void> processState(MeterState newer) async {
     String? msg;
     msg = announceMode(newer, old);
-    msg ??= announceSpecial(newer, old);
-    msg ??= announceValue(newer, old);
+    if (msg != null) {
+      await speech.speak(msg, interrupt: true);
+    } else {
+      msg = announceSpecial(newer, old);
+      if (msg != null) {
+        await speech.speak(msg, interrupt: true);
+      } else {
+        msg = announceValue(newer, old);
+        if (msg != null) {
+          await speech.speak(msg);
+        }
+      }
+    }
     old = newer.copy();
-    return msg;
   }
 }
