@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1](https://github.com/techexplorers123/VoxDMM/compare/v1.2.0...v1.2.1) (2026-05-11)
+
+
+### Bug Fixes
+
+* Fixed continuity and diode mode's unit announcement ([caa0943](https://github.com/techexplorers123/VoxDMM/commit/caa094396e45d52b7ad515ae0a1e2bcb0467de71))
+* the NCV is now matched properly ([a33c917](https://github.com/techexplorers123/VoxDMM/commit/a33c917a7ee4e9e0f9300a7f5445c5704659683b))
+
 ## [1.2.0](https://github.com/techexplorers123/VoxDMM/compare/v1.1.0...v1.2.0) (2026-05-11)
 
 
