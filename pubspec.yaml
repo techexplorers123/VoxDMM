@@ -9,6 +9,7 @@ environment:
 dependencies:
     flutter:
         sdk: flutter
+    flutter_blue_plus: ^2.3.2
 
 dev_dependencies:
     flutter_test:
@@ -19,3 +20,20 @@ dev_dependencies:
 
 flutter:
     uses-material-design: true
+    assets:
+        - assets/icon.png
+
+# use "dart run names_launcher:change" to applie
+names_launcher:
+    name: "VoxDMM"
+    platforms:
+        android:
+            enable: true
+
+# use "dart run flutter_launcher_icons" to applie
+flutter_launcher_icons:
+    image_path: "assets/icon.png"
+    android: true
+    # min_sdk_android: 21 # android min sdk min:16, default 21
+    adaptive_icon_background: "#ffffff"
+    adaptive_icon_foreground: "assets/icon.png"
