@@ -187,7 +187,7 @@ class MeterProcessor {
       state.family = Family.auto;
       state.rangeEnabled = false;
     }
-    if (display.contains("EF") || display.contains("-")) {
+    if (display.contains("EF") || RegExp(r"^-+$").hasMatch(display.trim())) {
       state.family = Family.ncv;
       state.rangeEnabled = false;
     }
