@@ -306,7 +306,6 @@ class MeterProcessor {
           }
         }
       }
-    } catch (e) {
     } finally {
       _processing = false;
     }

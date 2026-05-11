@@ -59,11 +59,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> startBLE() async {
-    statusSub = ble.statusStream.listen((newStatus) {
+    String? lastStatus;
+    statusSub = ble.statusStream.listen((newStatus) async {
       if (!mounted) return;
       setState(() {
         status = newStatus;
       });
+      if (newStatus == lastStatus) {
+        return;
+      }
+      lastStatus = newStatus;
+      await widget.speech.speak(newStatus, interrupt: true);
     });
     bleSub = ble.dataStream.listen((data) async {
       final d = decode(data);
