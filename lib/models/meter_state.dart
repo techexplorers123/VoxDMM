@@ -1,9 +1,9 @@
-import 'package:voxdmm/enums/meter_enums.dart';
+import 'package:voxdmm/enums/meter_Enums.dart';
 
 class MeterState {
   Family? family;
-  Resistance_Unit? resistanceUnit;
-  Capacitance_Unit? capacitanceUnit;
+  ResistanceUnit? resistanceUnit;
+  CapacitanceUnit? capacitanceUnit;
   ACDC acdc;
   bool continuity;
   bool diode;

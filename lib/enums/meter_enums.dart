@@ -1,26 +1,26 @@
 enum Family {
-  RESISTANCE,
-  FREQUENCY,
-  DUTY,
-  NCV,
-  TEMPERATURE_C,
-  TEMPERATURE_F,
-  DIODE_CONTINUITY,
-  CAPACITANCE,
-  VOLTAGE_V,
-  VOLTAGE_MV,
-  CURRENT_A,
-  CURRENT_MA,
-  CURRENT_U,
-  AUTO,
+  resistance,
+  frequency,
+  duty,
+  ncv,
+  temperaturec,
+  temperaturef,
+  diodecontinuity,
+  capacitance,
+  voltagev,
+  voltagemv,
+  currenta,
+  currentma,
+  currentu,
+  auto,
 }
 
-enum Resistance_Unit { OHM, K_OHM, M_OHM }
+enum ResistanceUnit { ohm, kohm, mohm }
 
-enum Capacitance_Unit { U_FARADS, N_FARADS, M_FARADS }
+enum CapacitanceUnit { ufarads, nfarads, mfarads }
 
-enum ACDC { AC, DC, none }
+enum ACDC { ac, dc, none }
 
-enum RangeMode { AUTO, MANUAL }
+enum RangeMode { auto, manual }
 
-enum MinMaxMode { NONE, MIN, MAX }
+enum MinMaxMode { none, min, max }
