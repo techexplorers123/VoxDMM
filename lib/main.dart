@@ -7,24 +7,27 @@ import 'services/dmmdecoder.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   final speech = SpeechService();
-
   await speech.init();
-
   runApp(MainApp(speech: speech));
 }
 
 class MainApp extends StatelessWidget {
   final SpeechService speech;
-
   const MainApp({super.key, required this.speech});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
+      theme: ThemeData(
+        visualDensity: VisualDensity.compact,
+        useMaterial3: true,
+        colorScheme: const ColorScheme.dark(
+          primary: Colors.white24,
+          onBackground: Colors.white10,
+          onSurface: Colors.white10,
+        ),
+      ),
       home: HomePage(speech: speech),
     );
   }
@@ -104,24 +107,40 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("VoxDMM")),
 
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                currentValue,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 40),
+              ),
 
-          children: [
-            Text(currentValue, style: const TextStyle(fontSize: 40)),
+              const SizedBox(height: 20),
 
-            const SizedBox(height: 20),
+              Text(
+                currentMode,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 24),
+              ),
 
-            Text(currentMode, style: const TextStyle(fontSize: 24)),
+              const SizedBox(height: 40),
 
-            const SizedBox(height: 40),
-            Text(status, style: const TextStyle(fontSize: 18)),
-          ],
+              Text(
+                status,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18),
+              ),
+            ],
+          ),
         ),
       ),
     );
