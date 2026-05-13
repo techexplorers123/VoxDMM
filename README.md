@@ -31,6 +31,7 @@ Prebuilt APK files are available from the GitHub Releases page:
 [VoxDMM Releases](https://github.com/techexplorers123/VoxDMM/releases)
 
 Download the latest release APK and install it on your Android device.
+coming to playstore later
 
 ## Build
 
@@ -42,6 +43,9 @@ Download the latest release APK and install it on your Android device.
 - A supported Zotek Bluetooth multimeter
 
 ### Setup
+
+Install flutter and setup flutter for android development if not already done:
+see [getting started with flutter](https://docs.flutter.dev/install/quick) and [setup android development](https://docs.flutter.dev/platform-integration/android/setup) for more info.
 
 Clone the project and install dependencies:
 
