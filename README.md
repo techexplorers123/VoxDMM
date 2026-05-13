@@ -17,11 +17,12 @@ be added in the future.
 
 ## supported models
 
-|Models|Test|
-|Aneng 9002|BSIDE ZT-300AB|ZOYI ZT-300AB|Yes|
-|Aneng V05B|BSIDE ZT-5B|ZOYI ZT-5B|should work submit a PR if any fix needed|
-|Aneng ST207|BSIDE ZT-5BQ|ZOYI ZT-5BQ|should work submit a PR if any fix needed|
-|Aneng AN999S ZOYI ZT-5566S Not completely
+| Aneng  | BSIDE    | ZOYI     | Status                                           |
+| ------ | -------- | -------- | ------------------------------------------------ |
+| 9002   | ZT-300AB | ZT-300AB | Yes                                              |
+| V05B   | ZT-5B    | ZT-5B    | Should work, submit a PR if any fixes are needed |
+| ST207  | ZT-5BQ   | ZT-5BQ   | Should work, submit a PR if any fixes are needed |
+| AN999S | -        | ZT-5566S | Not completely tested                            |
 
 ## Download
 
